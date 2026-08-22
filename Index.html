@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Casino</title>
+    <!-- Telegram WebApp scripti -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0d0d0d;
+            --card-bg: #1a1a1a;
+            --gold: #d4af37;
+            --gold-light: #f3e5ab;
+            --gold-dark: #aa8c2c;
+            --text-color: #ffffff;
+            --accent-red: #ff3b30;
+            --accent-green: #34c759;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin: auto;
+        }
+
+        /* Sarlavha */
+        h1 {
+            font-size: 1.8rem;
+            color: var(--gold);
+            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        /* Balans paneli */
+        .balance-card {
+            background: linear-gradient(135deg, var(--card-bg), #111);
+            border: 2px solid var(--gold);
+            border-radius: 15px;
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--gold-light);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Slot mashinasi oynasi */
+        .slot-machine {
+            background: linear-gradient(145deg, #161616, #0a0a0a);
+            border: 4px solid var(--gold);
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.2);
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .reel {
+            flex: 1;
+            height: 100px;
+            background: #000;
+            border: 2px inset var(--gold-dark);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .reel span {
+            transition: transform 0.1s ease;
+        }
+
+        /* Xabar paneli */
+        .message {
+            min-height: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: center;
+            color: var(--gold-light);
+        }
+
+        /* Tugmalar */
+        .btn-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #000;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+            border: 1px solid var(--gold-light);
+        }
+
+        .btn-play:active {
+            transform: scale(0.97);
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+        }
+
+        .btn-play:disabled {
+            background: #444;
+            color: #777;
+            border: 1px solid #555;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-bonus {
+            background: transparent;
+            border: 2px dashed var(--gold);
+            color: var(--gold);
+        }
+
+        .btn-bonus:active {
+            background: rgba(212, 175, 55, 0.1);
+            transform: scale(0.97);
+        }
+
+        /* Yutuqlar jadvali eslatmasi */
+        .rules {
+            font-size: 0.8rem;
+            color: #888;
+            text-align: center;
+            line-height: 1.4;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Sarlavha -->
+        <h1>🎰 Lucky Casino</h1>
+
+        <!-- Balans -->
+        <div class="balance-card">
+            <span>💰</span>
+            <span id="balance">1000</span> coin
+        </div>
+
+        <!-- Slot Oyna -->
+        <div class="slot-machine">
+            <div class="reel" id="reel1"><span>🍒</span></div>
+            <div class="reel" id="reel2"><span>🍋</span></div>
+            <div class="reel" id="reel3"><span>7️⃣</span></div>
+        </div>
+
+        <!-- Xabar -->
+        <div class="message" id="message">O'ynash uchun PLAY tugmasini bosing! (Narxi: 10 coin)</div>
+
+        <!-- Tugmalar -->
+        <div class="btn-container">
+            <button class="btn btn-play" id="playBtn" onclick="spin()">🎰 PLAY</button>
+            <button class="btn btn-bonus" onclick="claimBonus()">🎁 BONUS OLISH</button>
+        </div>
+
+        <!-- Qoidalar -->
+        <div class="rules">
+            3 ta 💎 = 500 coin | 3 ta 7️⃣ = 300 coin<br>
+            3 ta 🍒/🍋 = 100 coin | 2 ta bir xil = 20 coin
+        </div>
+    </div>
+
+    <script>
+        // Telegram WebApp sozlamasi
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // O'yin o'zgaruvchilari
+        let balance = 1000;
+        const COST_PER_SPIN = 10;
+        const symbols = ['🍒', '🍋', '7️⃣', '💎'];
+        let isSpinning = false;
+
+        // Elementlarni olish
+        const balanceEl = document.getElementById('balance');
+        const messageEl = document.getElementById('message');
+        const playBtn = document.getElementById('playBtn');
+        const r1 = document.getElementById('reel1').firstElementChild;
+        const r2 = document.getElementById('reel2').firstElementChild;
+        const r3 = document.getElementById('reel3').firstElementChild;
+
+        // LocalStorage dan saqlangan balansni yuklash
+        if (localStorage.getItem('casino_balance')) {
+            balance = parseInt(localStorage.getItem('casino_balance'));
+            updateBalanceUI();
+        }
+
+        function updateBalanceUI() {
+            balanceEl.textContent = balance;
+            localStorage.setItem('casino_balance', balance);
+        }
+
+        function getRandomSymbol() {
+            return symbols[Math.floor(Math.random() * symbols.length)];
+        }
+
+        function spin() {
+            if (isSpinning) return;
+
+            if (balance < COST_PER_SPIN) {
+                messageEl.textContent = "❌ Balansingiz yetarli emas! Bonus oling.";
+                messageEl.style.color = "var(--accent-red)";
+                return;
+            }
+
+            // Balansdan ayirish
+            balance -= COST_PER_SPIN;
+            updateBalanceUI();
+
+            isSpinning = true;
+            playBtn.disabled = true;
+            messageEl.textContent = "Aylantirilmoqda...";
+            messageEl.style.color = "var(--gold-light)";
+
+            // Animatsiya effekti uchun harakat
+            let counter = 0;
+            let spinInterval = setInterval(() => {
+                r1.textContent = getRandomSymbol();
+                r2.textContent = getRandomSymbol();
+                r3.textContent = getRandomSymbol();
+                counter++;
+
+                if (counter > 15) {
+                    clearInterval(spinInterval);
+                    finalizeSpin();
+                }
+            }, 80);
+        }
+
+        function finalizeSpin() {
+            // Yakuniy tasodifiy belgilar
+            const s1 = getRandomSymbol();
+            const s2 = getRandomSymbol();
+            const s3 = getRandomSymbol();
+
+            r1.textContent = s1;
+            r2.textContent = s2;
+            r3.textContent = s3;
+
+            let winAmount = 0;
+
+            // Yutuq kombinatsiyalarini tekshirish
+            if (s1 === s2 && s2 === s3) {
+                if (s1 === '💎') winAmount = 500;
+                else if (s1 === '7️⃣') winAmount = 300;
+                else winAmount = 100; // 🍒 yoki 🍋 uchun
+            } else if (s1 === s2 || s2 === s3 || s1 === s3) {
+                winAmount = 20; // 2 tasi bir xil bo'lsa tasalli mukofoti
+            }
+
+            if (winAmount > 0) {
+                balance += winAmount;
+                messageEl.textContent = `🎉 Tabriklayman! +${winAmount} coin yutib oldingiz!`;
+                messageEl.style.color = "var(--accent-green)";
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+            } else {
+                messageEl.textContent = "😔 Afsus, yutuq chiqmadi. Qayta urinib ko'ring!";
+                messageEl.style.color = "var(--accent-red)";
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('error');
+                }
+            }
+
+            updateBalanceUI();
+            isSpinning = false;
+            playBtn.disabled = false;
+        }
+
+        function claimBonus() {
+            const lastBonusDate = localStorage.getItem('last_bonus_date');
+            const today = new Date().toDateString();
+
+            if (lastBonusDate === today) {
+                messageEl.textContent = "⏳ Kunlik bonus allaqachon olingan. Ertaga keling!";
+                messageEl.style.color = "var(--accent-red)";
+                return;
+            }
+
+            balance += 200;
+            updateBalanceUI();
+            localStorage.setItem('last_bonus_date', today);
+            messageEl.textContent = "🎁 Tabriklayman! Kunlik 200 coin bonus berildi!";
+            messageEl.style.color = "var(--accent-green)";
+            
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+        }
+    </script>
+</body>
+</html>
